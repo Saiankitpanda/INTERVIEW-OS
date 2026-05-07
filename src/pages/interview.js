@@ -12,6 +12,7 @@ import { generateReport } from '../engine/rubricScorer.js';
 import { getRandomQuestion } from '../data/questions.js';
 import { getRubric } from '../data/rubrics.js';
 import { ChatComponent } from '../components/chat.js';
+import { AGENT_PROFILES } from '../engine/agents.js';
 import { CodeEditorComponent } from '../components/codeEditor.js';
 import { TimerComponent } from '../components/timer.js';
 
@@ -128,18 +129,43 @@ export function renderInterviewPage(container, params = {}) {
     });
 
     // Input handler
-    function handleCandidateInput(text) {
+    async function handleCandidateInput(text) {
         chat.addMessage('candidate', text);
         engine.addMessage('candidate', text);
 
         chat.showTyping();
 
-        // Simulate thinking delay
-        setTimeout(() => {
-            chat.hideTyping();
+        try {
+            // Get base logic response (for stage progression)
+            const fallbackResponse = roundLogic.processInput(text);
+            
+            // Try to use the AntiGravity Agent
+            let responseText = fallbackResponse;
+            const promptMap = {
+                dsa: AGENT_PROFILES.FAANG_LIVE_INTERVIEWER,
+                lld: AGENT_PROFILES.FAANG_LIVE_INTERVIEWER,
+                hld: AGENT_PROFILES.FAANG_LIVE_INTERVIEWER,
+                hr: AGENT_PROFILES.HR_INTERVIEWER
+            };
 
-            const response = roundLogic.processInput(text);
-            showInterviewerResponse(response);
+            const agentProfile = promptMap[round];
+            if (agentProfile) {
+                // Combine conversation history
+                const history = engine.conversation.map(m => `${m.role}: ${m.content}`).join('\n');
+                const fullPrompt = `${agentProfile.systemPrompt}\n\nCurrent Stage: ${engine.currentStage}\n\nConversation History:\n${history}\n\nCandidate: ${text}\n\nRespond as the interviewer:`;
+                
+                // In production, this would call the real Grok API. For MVP, we use our mocked/fetch wrapper
+                const { callGrokAPI } = await import('../engine/api.js');
+                const apiResponse = await callGrokAPI(fullPrompt, text);
+                
+                // Only replace if it's not our default mock string (to keep the flow working if key is missing)
+                if (apiResponse && !apiResponse.includes('mocked Grok')) {
+                    responseText = apiResponse;
+                }
+            }
+
+            chat.hideTyping();
+            showInterviewerResponse(responseText);
             updateStageIndicator();
             updateQuickActions();
 
@@ -147,7 +173,11 @@ export function renderInterviewPage(container, params = {}) {
                 endBtn.style.display = 'inline-flex';
                 chat.addSystemMessage('Interview complete! Click "View Report" to see your evaluation.');
             }
-        }, 800 + Math.random() * 700);
+        } catch(err) {
+            console.error("Agent error:", err);
+            chat.hideTyping();
+            showInterviewerResponse(roundLogic.processInput(text)); // fallback
+        }
     }
 
     function handleHintRequest() {

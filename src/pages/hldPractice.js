@@ -4,6 +4,8 @@
 
 import { hldMCQs } from '../data/hldMCQs.js';
 import { hldScenarios, chatResponses } from '../data/hldScenarios.js';
+import { callGrokAPI } from '../engine/api.js';
+import { AGENT_PROFILES } from '../engine/agents.js';
 
 export function renderHLDPracticePage(container) {
     let activeTab = 'mcq';
@@ -32,6 +34,9 @@ export function renderHLDPracticePage(container) {
             <button class="hld-tab ${activeTab === 'scenarios' ? 'active' : ''}" data-tab="scenarios">
               <span>🎯</span> Scenarios <span class="tab-count">${hldScenarios.length}</span>
             </button>
+            <button class="hld-tab ${activeTab === 'excalidraw' ? 'active' : ''}" data-tab="excalidraw">
+              <span>📐</span> Excalidraw Critique
+            </button>
           </div>
 
           <div class="hld-content" id="hld-content"></div>
@@ -48,6 +53,7 @@ export function renderHLDPracticePage(container) {
             case 'mcq': renderMCQ(content); break;
             case 'chat': renderChat(content); break;
             case 'scenarios': renderScenarios(content); break;
+            case 'excalidraw': renderExcalidraw(content); break;
         }
     }
 
@@ -266,6 +272,78 @@ export function renderHLDPracticePage(container) {
                 expandedScenario = expandedScenario === btn.dataset.id ? null : btn.dataset.id;
                 renderScenarios(content);
             });
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // EXCALIDRAW CRITIQUE
+    // ═══════════════════════════════════════════════════════════
+    function renderExcalidraw(content) {
+        content.innerHTML = `
+        <div class="excalidraw-container animate-fade-in-up" style="max-width: 800px; margin: 0 auto; text-align: center;">
+          <h3 class="config-title">Upload .excalidraw File</h3>
+          <p class="config-hint" style="margin-bottom: 2rem;">Our FAANG Principal SRE Agent will critique your system architecture.</p>
+          
+          <div class="upload-box glass" style="padding: 3rem; border-radius: var(--radius-xl); border: 2px dashed var(--glass-border); cursor: pointer; transition: all var(--transition-base);">
+             <div style="font-size: 48px; margin-bottom: 1rem;">📁</div>
+             <p style="color: var(--text-secondary); font-size: var(--text-lg); font-weight: 600;">Click to upload or drag and drop</p>
+             <p style="color: var(--text-muted); font-size: var(--text-sm); margin-top: 0.5rem;">.excalidraw files only</p>
+             <input type="file" id="excalidraw-file" accept=".excalidraw" style="display: none;" />
+          </div>
+
+          <div id="excalidraw-results" style="display: none; margin-top: 2rem; text-align: left; background: var(--bg-surface); padding: var(--space-6); border-radius: var(--radius-xl); border: 1px solid var(--glass-border);">
+            <!-- Agent Critique will appear here -->
+          </div>
+        </div>
+        `;
+
+        const uploadBox = content.querySelector('.upload-box');
+        const fileInput = content.querySelector('#excalidraw-file');
+
+        uploadBox.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    uploadBox.innerHTML = '<div style="font-size: 24px; color: var(--accent-indigo);">Parsing Architecture & Sending to Agent...</div>';
+                    
+                    const excalidrawJson = JSON.parse(event.target.result);
+                    // Extract text labels and basic element types to feed to the LLM
+                    const elements = excalidrawJson.elements || [];
+                    const textElements = elements.filter(el => el.type === 'text').map(el => el.text).join(', ');
+                    const objectTypes = elements.map(el => el.type).reduce((acc, val) => {
+                        acc[val] = (acc[val] || 0) + 1;
+                        return acc;
+                    }, {});
+
+                    const architectureSummary = `
+Architecture Contains:
+- Text Labels: ${textElements}
+- Element Counts: ${JSON.stringify(objectTypes)}
+                    `;
+
+                    const prompt = AGENT_PROFILES.CODE_REVIEWER.systemPrompt;
+                    const response = await callGrokAPI(prompt, "Please critique this architecture diagram data: " + architectureSummary);
+
+                    const resultsDiv = content.querySelector('#excalidraw-results');
+                    resultsDiv.style.display = 'block';
+                    resultsDiv.innerHTML = `
+                        <h4 style="color: var(--accent-rose); margin-bottom: 1rem;">FAANG Principal SRE Critique</h4>
+                        <div class="chat-msg-bubble" style="background: rgba(255,255,255,0.05); white-space: pre-wrap; font-size: 14px; line-height: 1.6;">${response.replace(/\n/g, '<br>')}</div>
+                    `;
+                    
+                    uploadBox.style.display = 'none';
+
+                } catch (err) {
+                    alert('Invalid .excalidraw file or API error: ' + err.message);
+                    renderExcalidraw(content); // Reset
+                }
+            };
+            reader.readAsText(file);
         });
     }
 

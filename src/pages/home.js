@@ -49,9 +49,29 @@ export function renderHomePage(container) {
     <div class="page-container">
       <!-- Hero -->
       <div class="home-hero animate-fade-in-up">
-        <div class="hero-badge badge badge-indigo">🎯 FAANG Interview Simulator</div>
-        <h1 class="hero-title">Master Your <span class="hero-gradient">Interview Skills</span></h1>
-        <p class="hero-subtitle">Practice DSA, System Design, Low-Level Design, and Behavioral rounds with an AI interviewer that adapts to your level.</p>
+        <div class="hero-badge badge badge-indigo">🎯 InterviewOS AntiGravity</div>
+        <h1 class="hero-title">Master Your <span class="hero-gradient">FAANG Interview</span></h1>
+        <p class="hero-subtitle">Agentic Talent Engine: Upload a JD to generate custom Take-Home assessments, or practice 5 FAANG rounds directly.</p>
+      </div>
+
+      <!-- AI Engine Feature Card -->
+      <div class="ai-engine-banner glass animate-fade-in-up" id="jd-feature-card">
+        <div class="ai-engine-left">
+          <div class="ai-engine-icon">🤖</div>
+          <div>
+            <div class="ai-engine-label">New Feature — AntiGravity AI Engine</div>
+            <h3 class="ai-engine-title">Job Description Analyzer</h3>
+            <p class="ai-engine-desc">Paste any JD and get a custom Take-Home assessment, FOSS repos, and FAANG rubric — powered by Grok xAI.</p>
+            <div class="ai-engine-pills">
+              <span class="ai-pill">⚡ Tech Stack Detection</span>
+              <span class="ai-pill">📋 Assessment Generator</span>
+              <span class="ai-pill">📦 FOSS Repos</span>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary ai-engine-cta" id="open-jd-analyzer">
+          Try JD Analyzer →
+        </button>
       </div>
 
       <!-- Round Cards -->
@@ -143,6 +163,11 @@ export function renderHomePage(container) {
         });
     });
 
+    // JD Analyzer banner button
+    container.querySelector('#open-jd-analyzer').addEventListener('click', () => {
+        router.navigate('/jd-parser');
+    });
+
     // Start
     container.querySelector('#start-btn').addEventListener('click', () => {
         if (!selectedRound) return;
@@ -153,6 +178,35 @@ export function renderHomePage(container) {
 function addHomeStyles(container) {
     const style = document.createElement('style');
     style.textContent = `
+    /* AI Engine Banner */
+    .ai-engine-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--space-6); padding: var(--space-6) var(--space-7);
+      border-radius: var(--radius-xl); margin-bottom: var(--space-8);
+      border: 1px solid rgba(99,102,241,0.25);
+      background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(6,182,212,0.05));
+      flex-wrap: wrap;
+    }
+    .ai-engine-left { display: flex; align-items: flex-start; gap: var(--space-5); flex: 1; }
+    .ai-engine-icon {
+      font-size: 36px; width: 64px; height: 64px; border-radius: var(--radius-lg);
+      background: rgba(99,102,241,0.15); display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .ai-engine-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--accent-indigo); margin-bottom: 4px;
+    }
+    .ai-engine-title { font-size: var(--text-xl); font-weight: 700; margin-bottom: 4px; }
+    .ai-engine-desc { font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--space-3); }
+    .ai-engine-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ai-pill {
+      background: rgba(99,102,241,0.12); color: var(--accent-indigo);
+      border: 1px solid rgba(99,102,241,0.2); border-radius: 999px;
+      padding: 3px 10px; font-size: 12px; font-weight: 600;
+    }
+    .ai-engine-cta { white-space: nowrap; flex-shrink: 0; }
+
     .home-hero { text-align: center; padding: var(--space-16) 0 var(--space-10); }
     .hero-badge { margin-bottom: var(--space-5); }
     .hero-title {

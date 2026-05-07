@@ -50,6 +50,12 @@ export function renderSidebar(container, activePage = 'home') {
           <span>LLD Resources</span>
         </button>
 
+        <div class="sidebar-section-label" style="color: var(--accent-indigo);">🤖 AI Engine</div>
+        <button class="sidebar-nav-item ${activePage === 'jd-parser' ? 'active' : ''}" data-page="jd-parser" style="${activePage === 'jd-parser' ? '' : 'border: 1px solid rgba(99,102,241,0.2);'}">
+          <span class="nav-icon">🧠</span>
+          <span>JD Analyzer</span>
+        </button>
+
         <div class="sidebar-section-label">Quick Start</div>
         <button class="sidebar-nav-item" data-quick="dsa">
           <span class="nav-icon">⚡</span>
