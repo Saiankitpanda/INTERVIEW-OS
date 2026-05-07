@@ -5,6 +5,7 @@
 
 import { questions, getQuestionsByRound } from '../data/questions.js';
 import { NC_TOPICS } from '../data/neetcode150.js';
+import { DSA_SOLUTIONS } from '../data/dsaSolutions.js';
 import { router } from '../router.js';
 import { auth } from '../services/auth.js';
 import { fetchProblemData, titleToSlug, getLangSlug } from '../services/leetcodeService.js';
@@ -154,6 +155,8 @@ export function renderQuestionsPage(container) {
           ${q.topic ? `<span class="q-tag topic-tag">${q.topic}</span>` : ''}
           ${lcNum ? `<a href="https://leetcode.com/problems/${q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, '')}" target="_blank" class="lc-link">🔗 LeetCode</a>` : ''}
         </div>
+
+        ${renderInsightPanel(q)}
 
         <!-- Test Cases from LeetCode API -->
         ${renderTestCases(q)}
@@ -413,6 +416,37 @@ export function renderQuestionsPage(container) {
     return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  // ─── ANTIGRAVITY INSIGHT PANEL ───────────────────────────
+  function renderInsightPanel(q) {
+    const s = DSA_SOLUTIONS[q.id];
+    if (!s) return '';
+    return `
+    <div class="insight-panel">
+      <div class="insight-header">
+        <span class="insight-icon">🤖</span>
+        <span class="insight-title">AntiGravity Engine — Approach Breakdown</span>
+      </div>
+      <div class="insight-grid">
+        <div class="insight-block">
+          <div class="insight-label">✅ Optimal Approach</div>
+          <p class="insight-text">${esc(s.approach)}</p>
+        </div>
+        <div class="insight-block">
+          <div class="insight-label">🐢 Brute Force</div>
+          <p class="insight-text insight-brute">${esc(s.brute)}</p>
+        </div>
+        <div class="insight-block insight-block-wide">
+          <div class="insight-label">⚡ Why This Complexity?</div>
+          <p class="insight-text insight-why">${esc(s.why)}</p>
+        </div>
+        <div class="insight-block">
+          <div class="insight-label">💎 Optimal Complexity</div>
+          <p class="insight-text insight-opt">${esc(s.optimal)}</p>
+        </div>
+      </div>
+    </div>`;
+  }
+
   // ─── CODE RUNNER ─────────────────────────────────────────
   function runCode(code, qid, approach) {
     const key = `${qid}-${approach}`;
@@ -618,6 +652,28 @@ function addQBStyles(container) {
   .qb-easy { color: var(--accent-emerald); }
   .qb-medium { color: var(--accent-amber); }
   .qb-hard { color: var(--accent-rose); }
+
+  /* AntiGravity Insight Panel */
+  .insight-panel {
+    margin-bottom: var(--space-5); padding: var(--space-5);
+    border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, rgba(99,102,241,0.07), rgba(6,182,212,0.04));
+    border: 1px solid rgba(99,102,241,0.2);
+  }
+  .insight-header { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); }
+  .insight-icon { font-size: 18px; }
+  .insight-title { font-size: 13px; font-weight: 700; color: var(--accent-indigo); letter-spacing: 0.02em; }
+  .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+  .insight-block-wide { grid-column: 1 / -1; }
+  .insight-block {
+    background: rgba(0,0,0,0.25); border-radius: var(--radius-lg);
+    padding: var(--space-3); border: 1px solid rgba(255,255,255,0.05);
+  }
+  .insight-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .insight-text { font-size: 13px; color: var(--text-secondary); line-height: 1.65; margin: 0; }
+  .insight-brute { color: #f87171; }
+  .insight-why { color: var(--accent-cyan); }
+  .insight-opt { color: var(--accent-emerald); font-weight: 600; }
 
   .qb-tabs { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); flex-wrap: wrap; }
   .qb-tab {

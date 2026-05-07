@@ -16,9 +16,7 @@ import { renderQuestionsPage } from './pages/questions.js';
 import { renderReportPage } from './pages/report.js';
 import { renderResourcesPage } from './pages/resources.js';
 import { renderHLDPracticePage } from './pages/hldPractice.js';
-import { renderPracticeLabPage } from './pages/practiceLab.js';
 import { renderStudyPlannerPage } from './pages/studyPlanner.js';
-import { renderTrackerPage } from './pages/tracker.js';
 import { renderJDParserPage } from './pages/jdParser.js';
 
 const app = document.getElementById('app');
@@ -53,9 +51,7 @@ router
   .on('/questions', withSidebar(renderQuestionsPage, 'questions'))
   .on('/resources', withSidebar(renderResourcesPage, 'resources'))
   .on('/hld-practice', withSidebar(renderHLDPracticePage, 'hld-practice'))
-  .on('/practice-lab', withSidebar(renderPracticeLabPage, 'practice-lab'))
   .on('/study-planner', withSidebar(renderStudyPlannerPage, 'study-planner'))
-  .on('/tracker', withSidebar(renderTrackerPage, 'tracker'))
   .on('/jd-parser', withSidebar(renderJDParserPage, 'jd-parser'))
   .on('/interview', fullScreen(renderInterviewPage))
   .on('/report', withSidebar(renderReportPage, 'report'))

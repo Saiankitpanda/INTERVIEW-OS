@@ -31,17 +31,9 @@ export function renderSidebar(container, activePage = 'home') {
           <span class="nav-icon">🏛️</span>
           <span>HLD Practice</span>
         </button>
-        <button class="sidebar-nav-item ${activePage === 'practice-lab' ? 'active' : ''}" data-page="practice-lab">
-          <span class="nav-icon">🧪</span>
-          <span>Practice Lab</span>
-        </button>
         <button class="sidebar-nav-item ${activePage === 'study-planner' ? 'active' : ''}" data-page="study-planner">
           <span class="nav-icon">📅</span>
           <span>90-Day Planner</span>
-        </button>
-        <button class="sidebar-nav-item ${activePage === 'tracker' ? 'active' : ''}" data-page="tracker">
-          <span class="nav-icon">📊</span>
-          <span>Tracker</span>
         </button>
 
         <div class="sidebar-section-label">Resources</div>
